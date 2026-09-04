@@ -1,2 +1,2 @@
 # Gyalang
-A passion project programming language supposed to be compiled to Java bytecode. - Inspired by kotlin!
+A passion project **programming language** which has **Python** syntax but **compiles to Java** bytecode. - Inspired by **kotlin**!
