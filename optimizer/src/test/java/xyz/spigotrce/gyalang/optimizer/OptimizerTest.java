@@ -1,11 +1,15 @@
 package xyz.spigotrce.gyalang.optimizer;
 
-import org.junit.jupiter.api.Test;
-import xyz.spigotrce.gyalang.ast.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import xyz.spigotrce.gyalang.ast.IntLiteral;
+import xyz.spigotrce.gyalang.ast.PrintStmt;
+import xyz.spigotrce.gyalang.ast.Program;
 
 class OptimizerTest {
 

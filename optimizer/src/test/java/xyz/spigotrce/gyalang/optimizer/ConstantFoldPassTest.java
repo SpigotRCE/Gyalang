@@ -1,11 +1,22 @@
 package xyz.spigotrce.gyalang.optimizer;
 
-import org.junit.jupiter.api.Test;
-import xyz.spigotrce.gyalang.ast.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import xyz.spigotrce.gyalang.ast.Assignment;
+import xyz.spigotrce.gyalang.ast.BinExpr;
+import xyz.spigotrce.gyalang.ast.BoolLiteral;
+import xyz.spigotrce.gyalang.ast.Expr;
+import xyz.spigotrce.gyalang.ast.FloatLiteral;
+import xyz.spigotrce.gyalang.ast.Identifier;
+import xyz.spigotrce.gyalang.ast.IntLiteral;
+import xyz.spigotrce.gyalang.ast.PrintStmt;
+import xyz.spigotrce.gyalang.ast.Program;
+import xyz.spigotrce.gyalang.ast.Stmt;
+import xyz.spigotrce.gyalang.ast.UnaryExpr;
 
 class ConstantFoldPassTest {
 

@@ -1,9 +1,18 @@
 package xyz.spigotrce.gyalang.optimizer;
 
-import xyz.spigotrce.gyalang.ast.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import xyz.spigotrce.gyalang.ast.Assignment;
+import xyz.spigotrce.gyalang.ast.BinExpr;
+import xyz.spigotrce.gyalang.ast.Block;
+import xyz.spigotrce.gyalang.ast.BoolLiteral;
+import xyz.spigotrce.gyalang.ast.Expr;
+import xyz.spigotrce.gyalang.ast.FloatLiteral;
+import xyz.spigotrce.gyalang.ast.IntLiteral;
+import xyz.spigotrce.gyalang.ast.PrintStmt;
+import xyz.spigotrce.gyalang.ast.Program;
+import xyz.spigotrce.gyalang.ast.Stmt;
+import xyz.spigotrce.gyalang.ast.UnaryExpr;
 
 public class ConstantFoldPass implements OptimizationPass {
 
@@ -20,15 +29,15 @@ public class ConstantFoldPass implements OptimizationPass {
   }
 
   private Stmt foldStmt(Stmt stmt) {
-    if (stmt instanceof PrintStmt printStmt) {
-      return new PrintStmt(foldExpr(printStmt.value()));
+    if (stmt instanceof PrintStmt(Expr value)) {
+      return new PrintStmt(foldExpr(value));
     }
-    if (stmt instanceof Assignment assign) {
-      return new Assignment(assign.name(), foldExpr(assign.value()));
+    if (stmt instanceof Assignment(String name, Expr value)) {
+      return new Assignment(name, foldExpr(value));
     }
-    if (stmt instanceof Block block) {
+    if (stmt instanceof Block(List<Stmt> statements)) {
       List<Stmt> inner = new ArrayList<>();
-      for (Stmt s : block.statements()) {
+      for (Stmt s : statements) {
         inner.add(foldStmt(s));
       }
       return new Block(inner);
@@ -36,24 +45,24 @@ public class ConstantFoldPass implements OptimizationPass {
     return stmt;
   }
 
-  Expr foldExpr(Expr expr) {
-    if (expr instanceof BinExpr bin) {
-      Expr left = foldExpr(bin.left());
-      Expr right = foldExpr(bin.right());
-      if (left instanceof IntLiteral l && right instanceof IntLiteral r) {
-        return foldIntBin(bin.op(), l.value(), r.value());
+  public Expr foldExpr(Expr expr) {
+    if (expr instanceof BinExpr(BinExpr.Op op, Expr left1, Expr right1)) {
+      Expr left = foldExpr(left1);
+      Expr right = foldExpr(right1);
+      if (left instanceof IntLiteral(int value) && right instanceof IntLiteral(int value2)) {
+        return foldIntBin(op, value, value2);
       }
-      if (left instanceof FloatLiteral l && right instanceof FloatLiteral r) {
-        return foldFloatBin(bin.op(), l.value(), r.value());
+      if (left instanceof FloatLiteral(double value) && right instanceof FloatLiteral(double value1)) {
+        return foldFloatBin(op, value, value1);
       }
-      return new BinExpr(bin.op(), left, right);
+      return new BinExpr(op, left, right);
     }
-    if (expr instanceof UnaryExpr unary) {
-      Expr operand = foldExpr(unary.operand());
-      if (unary.op() == UnaryExpr.Op.NEG && operand instanceof IntLiteral intLit) {
-        return new IntLiteral(-intLit.value());
+    if (expr instanceof UnaryExpr(UnaryExpr.Op op, Expr operand1)) {
+      Expr operand = foldExpr(operand1);
+      if (op == UnaryExpr.Op.NEG && operand instanceof IntLiteral(int value)) {
+        return new IntLiteral(-value);
       }
-      return new UnaryExpr(unary.op(), operand);
+      return new UnaryExpr(op, operand);
     }
     return expr;
   }

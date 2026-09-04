@@ -1,9 +1,8 @@
 package xyz.spigotrce.gyalang.optimizer;
 
-import xyz.spigotrce.gyalang.ast.Program;
-
 import java.util.ArrayList;
 import java.util.List;
+import xyz.spigotrce.gyalang.ast.Program;
 
 public class Optimizer {
   private final List<OptimizationPass> passes = new ArrayList<>();
