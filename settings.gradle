@@ -1,0 +1,5 @@
+rootProject.name = "Gylang"
+
+include "ast"
+include "compiler"
+include "optimizer"

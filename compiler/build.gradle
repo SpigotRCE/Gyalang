@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(":ast")
+    implementation project(":optimizer")
+}
