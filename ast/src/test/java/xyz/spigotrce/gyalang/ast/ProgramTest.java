@@ -16,14 +16,16 @@ class ProgramTest {
   }
 
   @Test void programWithStatements() {
-    Stmt stmt = new PrintStmt(new StringLiteral("hello"));
+    Stmt stmt = new ExprStmt(new CallExpr(new Identifier("print"), List.of(new StringLiteral("hello"))));
     Program program = new Program(List.of(stmt));
     assertEquals(1, program.statements().size());
     assertSame(stmt, program.statements().getFirst());
   }
 
   @Test void statementsAreImmutable() {
-    Program program = new Program(List.of(new PrintStmt(new StringLiteral("a"))));
-    assertThrows(UnsupportedOperationException.class, () -> program.statements().add(new PrintStmt(new StringLiteral("b"))));
+    Program program = new Program(List.of(
+        new ExprStmt(new CallExpr(new Identifier("print"), List.of(new StringLiteral("a"))))));
+    assertThrows(UnsupportedOperationException.class, () -> program.statements().add(
+        new ExprStmt(new CallExpr(new Identifier("print"), List.of(new StringLiteral("b"))))));
   }
 }

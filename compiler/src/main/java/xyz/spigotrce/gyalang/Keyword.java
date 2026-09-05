@@ -2,7 +2,7 @@ package xyz.spigotrce.gyalang;
 
 import java.util.Set;
 
-public final class Keyword {
+public class Keyword {
   public static final Set<String> KEYWORDS = Set.of(
       "if", "elif", "else",
       "while", "for", "in",

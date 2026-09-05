@@ -1,4 +1,17 @@
+plugins {
+    id 'application'
+}
+
 dependencies {
     implementation project(":ast")
     implementation project(":optimizer")
+
+    implementation "org.ow2.asm:asm:9.9"
+    implementation "org.ow2.asm:asm-commons:9.9"
+    implementation "org.ow2.asm:asm-tree:9.9"
+    implementation "org.ow2.asm:asm-util:9.9"
+}
+
+application {
+    mainClass = 'xyz.spigotrce.gyalang.Main'
 }

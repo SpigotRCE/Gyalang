@@ -6,10 +6,14 @@ import xyz.spigotrce.gyalang.ast.Assignment;
 import xyz.spigotrce.gyalang.ast.BinExpr;
 import xyz.spigotrce.gyalang.ast.Block;
 import xyz.spigotrce.gyalang.ast.BoolLiteral;
+import xyz.spigotrce.gyalang.ast.CallExpr;
 import xyz.spigotrce.gyalang.ast.Expr;
+import xyz.spigotrce.gyalang.ast.ExprStmt;
 import xyz.spigotrce.gyalang.ast.FloatLiteral;
+import xyz.spigotrce.gyalang.ast.ForStmt;
+import xyz.spigotrce.gyalang.ast.Identifier;
 import xyz.spigotrce.gyalang.ast.IntLiteral;
-import xyz.spigotrce.gyalang.ast.PrintStmt;
+import xyz.spigotrce.gyalang.ast.NamedArg;
 import xyz.spigotrce.gyalang.ast.Program;
 import xyz.spigotrce.gyalang.ast.Stmt;
 import xyz.spigotrce.gyalang.ast.UnaryExpr;
@@ -29,8 +33,18 @@ public class ConstantFoldPass implements OptimizationPass {
   }
 
   private Stmt foldStmt(Stmt stmt) {
-    if (stmt instanceof PrintStmt(Expr value)) {
-      return new PrintStmt(foldExpr(value));
+    if (stmt instanceof ExprStmt(Expr expr)
+        && expr instanceof CallExpr(Expr callee, List<Expr> arguments, List<NamedArg> keywords)
+        && callee instanceof Identifier(String name)) {
+      List<Expr> foldedArgs = new ArrayList<>();
+      for (Expr arg : arguments) {
+        foldedArgs.add(foldExpr(arg));
+      }
+      List<NamedArg> foldedKw = new ArrayList<>();
+      for (NamedArg kw : keywords) {
+        foldedKw.add(new NamedArg(kw.name(), foldExpr(kw.value())));
+      }
+      return new ExprStmt(new CallExpr(callee, foldedArgs, foldedKw));
     }
     if (stmt instanceof Assignment(String name, Expr value)) {
       return new Assignment(name, foldExpr(value));
@@ -41,6 +55,9 @@ public class ConstantFoldPass implements OptimizationPass {
         inner.add(foldStmt(s));
       }
       return new Block(inner);
+    }
+    if (stmt instanceof ForStmt(String variable, Expr iterable, Block body)) {
+      return new ForStmt(variable, foldExpr(iterable), (Block) foldStmt(body));
     }
     return stmt;
   }

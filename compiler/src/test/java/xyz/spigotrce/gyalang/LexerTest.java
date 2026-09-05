@@ -69,4 +69,38 @@ class LexerTest {
     assertEquals(Token.Type.IDENT, tokens.getFirst().type());
     assertEquals(Token.Type.INT, tokens.get(1).type());
   }
+
+  @Test void dotToken() {
+    Lexer lexer = new Lexer("a.b", "test.glg");
+    List<Token> tokens = lexer.tokenize().stream().filter(t -> t.type() != Token.Type.NEWLINE).toList();
+    assertEquals(Token.Type.IDENT, tokens.get(0).type());
+    assertEquals(Token.Type.DOT, tokens.get(1).type());
+    assertEquals(Token.Type.IDENT, tokens.get(2).type());
+  }
+
+  @Test void tripleDoubleQuotedString() {
+    Lexer lexer = new Lexer("print(\"\"\"hello\nworld\"\"\")", "test.glg");
+    List<Token> tokens = lexer.tokenize();
+    Token str = tokens.stream().filter(t -> t.type() == Token.Type.STRING).findFirst().orElseThrow();
+    assertEquals("hello\nworld", str.value());
+  }
+
+  @Test void tripleSingleQuotedString() {
+    Lexer lexer = new Lexer("print('''multi\nline''')", "test.glg");
+    List<Token> tokens = lexer.tokenize();
+    Token str = tokens.stream().filter(t -> t.type() == Token.Type.STRING).findFirst().orElseThrow();
+    assertEquals("multi\nline", str.value());
+  }
+
+  @Test void embeddedNewlinesProduceNoIndentTokens() {
+    Lexer lexer = new Lexer("x = \"\"\"a\nb\nc\"\"\"", "test.glg");
+    List<Token> tokens = lexer.tokenize();
+    assertEquals(0, tokens.stream().filter(t -> t.type() == Token.Type.INDENT).count());
+    assertEquals(0, tokens.stream().filter(t -> t.type() == Token.Type.DEDENT).count());
+    Token str = tokens.stream().filter(t -> t.type() == Token.Type.STRING).findFirst().orElseThrow();
+    assertEquals("""
+        a
+        b
+        c""", str.value());
+  }
 }

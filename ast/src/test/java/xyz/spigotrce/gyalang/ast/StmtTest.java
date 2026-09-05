@@ -10,10 +10,18 @@ import org.junit.jupiter.api.Test;
 
 class StmtTest {
 
-  @Test void printStmt() {
+  @Test void exprStmt() {
+    Expr call = new CallExpr(new Identifier("f"), List.of());
+    ExprStmt stmt = new ExprStmt(call);
+    assertSame(call, stmt.expr());
+  }
+
+  @Test void printCall() {
     Expr value = new StringLiteral("hi");
-    PrintStmt stmt = new PrintStmt(value);
-    assertSame(value, stmt.value());
+    ExprStmt stmt = new ExprStmt(new CallExpr(new Identifier("print"), List.of(value)));
+    CallExpr call = (CallExpr) stmt.expr();
+    assertEquals("print", ((Identifier) call.callee()).name());
+    assertSame(value, call.arguments().getFirst());
   }
 
   @Test void assignment() {
@@ -49,7 +57,9 @@ class StmtTest {
   }
 
   @Test void blockIsImmutable() {
-    Block block = new Block(List.of(new PrintStmt(new StringLiteral("a")), new PrintStmt(new StringLiteral("b"))));
+    ExprStmt a = new ExprStmt(new CallExpr(new Identifier("print"), List.of(new StringLiteral("a"))));
+    ExprStmt b = new ExprStmt(new CallExpr(new Identifier("print"), List.of(new StringLiteral("b"))));
+    Block block = new Block(List.of(a, b));
     assertEquals(2, block.statements().size());
     assertThrows(UnsupportedOperationException.class, () -> block.statements().clear());
   }
@@ -67,14 +77,52 @@ class StmtTest {
 
   @Test void funcDef() {
     Block body = new Block(List.of(new ReturnStmt(new Identifier("x"))));
-    FuncDef func = new FuncDef("add", List.of("a", "b"), body);
+    FuncDef func = new FuncDef("add",
+        List.of(new Param("self", "obj"), new Param("a", "obj"), new Param("b", "obj")),
+        body);
     assertEquals("add", func.name());
-    assertEquals(List.of("a", "b"), func.parameters());
+    assertEquals("self", func.parameters().getFirst().name());
+    assertEquals("obj", func.parameters().getFirst().type());
+    assertEquals("a", func.parameters().get(1).name());
+    assertEquals("b", func.parameters().get(2).name());
     assertSame(body, func.body());
   }
 
   @Test void funcDefParametersAreImmutable() {
-    FuncDef func = new FuncDef("f", List.of("x"), new Block(List.of()));
-    assertThrows(UnsupportedOperationException.class, () -> func.parameters().add("y"));
+    FuncDef func = new FuncDef("f", List.of(new Param("x", "obj")), new Block(List.of()));
+    assertThrows(UnsupportedOperationException.class, () -> func.parameters().add(new Param("y", "obj")));
+  }
+
+  @Test void paramStoresNameAndType() {
+    Param param = new Param("n", "int");
+    assertEquals("n", param.name());
+    assertEquals("int", param.type());
+  }
+
+  @Test void classDef() {
+    FuncDef main = new FuncDef("main", List.of(new Param("self", "obj")), new Block(List.of()));
+    ClassDef clazz = new ClassDef("Main", List.of(main));
+    assertEquals("Main", clazz.name());
+    assertSame(main, clazz.methods().getFirst());
+  }
+
+  @Test void getAttr() {
+    GetAttr attr = new GetAttr(new Identifier("p"), "x");
+    assertEquals("x", attr.name());
+    assertEquals("p", ((Identifier) attr.receiver()).name());
+  }
+
+  @Test void setAttr() {
+    Expr value = new IntLiteral(3);
+    SetAttr set = new SetAttr(new Identifier("self"), "count", value, "int");
+    assertEquals("count", set.name());
+    assertEquals("int", set.type());
+    assertSame(value, set.value());
+  }
+
+  @Test void setAttrWithoutTypeAndValue() {
+    SetAttr set = new SetAttr(new Identifier("self"), "count", null, null);
+    assertNull(set.value());
+    assertNull(set.type());
   }
 }

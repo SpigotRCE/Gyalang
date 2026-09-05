@@ -7,15 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import xyz.spigotrce.gyalang.ast.CallExpr;
+import xyz.spigotrce.gyalang.ast.ExprStmt;
+import xyz.spigotrce.gyalang.ast.Identifier;
 import xyz.spigotrce.gyalang.ast.IntLiteral;
-import xyz.spigotrce.gyalang.ast.PrintStmt;
 import xyz.spigotrce.gyalang.ast.Program;
 
 class OptimizerTest {
 
   @Test void noPassesReturnsOriginal() {
     Optimizer opt = new Optimizer();
-    Program program = new Program(List.of(new PrintStmt(new IntLiteral(1))));
+    Program program = new Program(List.of(
+        new ExprStmt(new CallExpr(new Identifier("print"), List.of(new IntLiteral(1))))));
     Program result = opt.run(program);
     assertSame(program, result);
   }
@@ -46,7 +49,7 @@ class OptimizerTest {
     assertThrows(UnsupportedOperationException.class, () -> passes.add(new NoOpPass()));
   }
 
-  static class NoOpPass implements OptimizationPass {
+  private static class NoOpPass implements OptimizationPass {
     @Override public String getName() {
       return "NoOp";
     }
@@ -56,22 +59,15 @@ class OptimizerTest {
     }
   }
 
-  static class RecordingPass implements OptimizationPass {
-    private final StringBuilder log;
-    private final String label;
-
-    RecordingPass(StringBuilder log, String label) {
-      this.log = log;
-      this.label = label;
-    }
+  private record RecordingPass(StringBuilder log, String label) implements OptimizationPass {
 
     @Override public String getName() {
-      return "Recording(" + label + ")";
-    }
+        return "Recording(" + label + ")";
+      }
 
-    @Override public Program run(Program program) {
-      log.append(label);
-      return program;
+      @Override public Program run(Program program) {
+        log.append(label);
+        return program;
+      }
     }
-  }
 }
