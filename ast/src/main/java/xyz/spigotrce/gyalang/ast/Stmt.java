@@ -1,4 +1,3 @@
 package xyz.spigotrce.gyalang.ast;
 
-public interface Stmt {
-}
+public interface Stmt {}

@@ -12,32 +12,38 @@ import org.junit.jupiter.api.Test;
 
 class ExprTest {
 
-  @Test void stringLiteral() {
+  @Test
+  void stringLiteral() {
     StringLiteral lit = new StringLiteral("hello world");
     assertEquals("hello world", lit.value());
   }
 
-  @Test void intLiteral() {
+  @Test
+  void intLiteral() {
     IntLiteral lit = new IntLiteral(42);
     assertEquals(42, lit.value());
   }
 
-  @Test void floatLiteral() {
+  @Test
+  void floatLiteral() {
     FloatLiteral lit = new FloatLiteral(3.14);
     assertEquals(3.14, lit.value());
   }
 
-  @Test void boolLiteral() {
+  @Test
+  void boolLiteral() {
     assertTrue(new BoolLiteral(true).value());
     assertFalse(new BoolLiteral(false).value());
   }
 
-  @Test void identifier() {
+  @Test
+  void identifier() {
     Identifier id = new Identifier("myVar");
     assertEquals("myVar", id.name());
   }
 
-  @Test void binExpr() {
+  @Test
+  void binExpr() {
     Expr left = new IntLiteral(1);
     Expr right = new IntLiteral(2);
     BinExpr expr = new BinExpr(BinExpr.Op.ADD, left, right);
@@ -46,14 +52,16 @@ class ExprTest {
     assertEquals(BinExpr.Op.ADD, expr.op());
   }
 
-  @Test void unaryExpr() {
+  @Test
+  void unaryExpr() {
     Expr operand = new IntLiteral(5);
     UnaryExpr expr = new UnaryExpr(UnaryExpr.Op.NEG, operand);
     assertSame(operand, expr.operand());
     assertEquals(UnaryExpr.Op.NEG, expr.op());
   }
 
-  @Test void callExpr() {
+  @Test
+  void callExpr() {
     Expr callee = new Identifier("print");
     List<Expr> args = List.of(new StringLiteral("hi"), new IntLiteral(1));
     CallExpr call = new CallExpr(callee, args);
@@ -61,13 +69,18 @@ class ExprTest {
     assertEquals(2, call.arguments().size());
   }
 
-  @Test void callExprArgumentsAreImmutable() {
+  @Test
+  void callExprArgumentsAreImmutable() {
     CallExpr call = new CallExpr(new Identifier("f"), List.of());
-    assertThrows(UnsupportedOperationException.class, () -> call.arguments().add(new IntLiteral(1)));
+    assertThrows(
+        UnsupportedOperationException.class, () -> call.arguments().add(new IntLiteral(1)));
   }
 
-  @Test void nestedExpressions() {
-    BinExpr expr = new BinExpr(BinExpr.Op.ADD, new UnaryExpr(UnaryExpr.Op.NEG, new IntLiteral(1)), new IntLiteral(2));
+  @Test
+  void nestedExpressions() {
+    BinExpr expr =
+        new BinExpr(
+            BinExpr.Op.ADD, new UnaryExpr(UnaryExpr.Op.NEG, new IntLiteral(1)), new IntLiteral(2));
     assertInstanceOf(BinExpr.class, expr);
     assertInstanceOf(UnaryExpr.class, expr.left());
     assertInstanceOf(IntLiteral.class, expr.right());

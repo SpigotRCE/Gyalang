@@ -33,7 +33,8 @@ import xyz.spigotrce.gyalang.ast.WhileStmt;
 
 class ParserTest {
 
-  @Test void emptySource() {
+  @Test
+  void emptySource() {
     assertInstanceOf(Program.class, parse(""));
   }
 
@@ -43,7 +44,8 @@ class ParserTest {
     return parser.parse();
   }
 
-  @Test void parsesPrint() {
+  @Test
+  void parsesPrint() {
     Block body = mainBody(main("print(\"hi\")"));
     ExprStmt exprStmt = assertInstanceOf(ExprStmt.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, exprStmt.expr());
@@ -57,7 +59,9 @@ class ParserTest {
   }
 
   private static String main(String... bodyLines) {
-    StringBuilder sb = new StringBuilder("""
+    StringBuilder sb =
+        new StringBuilder(
+            """
         class Main:
             def main(self):
         """);
@@ -78,14 +82,16 @@ class ParserTest {
     return parser.parse();
   }
 
-  @Test void parsesAssignment() {
+  @Test
+  void parsesAssignment() {
     Block body = mainBody(main("x = 42"));
     Assignment assignment = assertInstanceOf(Assignment.class, body.statements().getFirst());
     assertEquals("x", assignment.name());
     assertEquals(42, assertInstanceOf(IntLiteral.class, assignment.value()).value());
   }
 
-  @Test void parsesArithmeticWithPrecedence() {
+  @Test
+  void parsesArithmeticWithPrecedence() {
     Block body = mainBody(main("y = 1 + 2 * 3"));
     Assignment assignment = assertInstanceOf(Assignment.class, body.statements().getFirst());
     BinExpr expr = assertInstanceOf(BinExpr.class, assignment.value());
@@ -93,7 +99,8 @@ class ParserTest {
     assertEquals(BinExpr.Op.MUL, assertInstanceOf(BinExpr.class, expr.right()).op());
   }
 
-  @Test void parsesComparisonAndLogical() {
+  @Test
+  void parsesComparisonAndLogical() {
     Block body = mainBody(main("z = 1 < 2 and True"));
     Assignment assignment = assertInstanceOf(Assignment.class, body.statements().getFirst());
     BinExpr and = assertInstanceOf(BinExpr.class, assignment.value());
@@ -102,14 +109,17 @@ class ParserTest {
     assertTrue(assertInstanceOf(BoolLiteral.class, and.right()).value());
   }
 
-  @Test void parsesIfElifElse() {
-    Block body = mainBody(main(
-        "if x > 1:",
-        "    print(\"a\")",
-        "elif x > 2:",
-        "    print(\"b\")",
-        "else:",
-        "    print(\"c\")"));
+  @Test
+  void parsesIfElifElse() {
+    Block body =
+        mainBody(
+            main(
+                "if x > 1:",
+                "    print(\"a\")",
+                "elif x > 2:",
+                "    print(\"b\")",
+                "else:",
+                "    print(\"c\")"));
     IfStmt outer = assertInstanceOf(IfStmt.class, body.statements().getFirst());
     BinExpr cond = assertInstanceOf(BinExpr.class, outer.condition());
     assertEquals(BinExpr.Op.GT, cond.op());
@@ -119,30 +129,26 @@ class ParserTest {
     assertInstanceOf(Block.class, inner.elseBlock());
   }
 
-  @Test void parsesWhileLoop() {
-    Block body = mainBody(main(
-        "while i < 3:",
-        "    print(i)",
-        "    i = i + 1"));
+  @Test
+  void parsesWhileLoop() {
+    Block body = mainBody(main("while i < 3:", "    print(i)", "    i = i + 1"));
     WhileStmt loop = assertInstanceOf(WhileStmt.class, body.statements().getFirst());
     assertInstanceOf(BinExpr.class, loop.condition());
     assertEquals(2, loop.body().statements().size());
   }
 
-  @Test void parsesForLoop() {
-    Block body = mainBody(main(
-        "for ch in \"abc\":",
-        "    print(ch)"));
+  @Test
+  void parsesForLoop() {
+    Block body = mainBody(main("for ch in \"abc\":", "    print(ch)"));
     ForStmt loop = assertInstanceOf(ForStmt.class, body.statements().getFirst());
     assertEquals("ch", loop.variable());
     assertInstanceOf(StringLiteral.class, loop.iterable());
     assertEquals(1, loop.body().statements().size());
   }
 
-  @Test void parsesRangeForLoop() {
-    Block body = mainBody(main(
-        "for i in range(1, 5):",
-        "    print(i)"));
+  @Test
+  void parsesRangeForLoop() {
+    Block body = mainBody(main("for i in range(1, 5):", "    print(i)"));
     ForStmt loop = assertInstanceOf(ForStmt.class, body.statements().getFirst());
     assertEquals("i", loop.variable());
     Expr iterable = loop.iterable();
@@ -152,9 +158,9 @@ class ParserTest {
     assertEquals("range", ((Identifier) call.callee()).name());
   }
 
-  @Test void parsesKeywordArgs() {
-    Block body = mainBody(main(
-        "print(\"a\", \"b\", sep=\"-\", end=\"|\")"));
+  @Test
+  void parsesKeywordArgs() {
+    Block body = mainBody(main("print(\"a\", \"b\", sep=\"-\", end=\"|\")"));
     ExprStmt stmt = assertInstanceOf(ExprStmt.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, stmt.expr());
     assertEquals(2, call.arguments().size());
@@ -164,8 +170,11 @@ class ParserTest {
     assertEquals("|", ((StringLiteral) call.keywords().get(1).value()).value());
   }
 
-  @Test void parsesDefaultParameters() {
-    Program program = parseOr("""
+  @Test
+  void parsesDefaultParameters() {
+    Program program =
+        parseOr(
+            """
         class Main:
             def greet(name, greeting="Hello", punct="!"):
                 pass
@@ -179,26 +188,37 @@ class ParserTest {
     assertNull(greet.parameters().getFirst().default_());
   }
 
-  @Test void positionalAfterKeywordIsRejected() {
-    assertThrows(IllegalStateException.class, () ->
-        parseOr("""
+  @Test
+  void positionalAfterKeywordIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            parseOr(
+                """
             class Main:
                 def main(self):
                     print("a", sep="-", "b")
             """));
   }
 
-  @Test void nonDefaultAfterDefaultParameterIsRejected() {
-    assertThrows(IllegalStateException.class, () ->
-        parseOr("""
+  @Test
+  void nonDefaultAfterDefaultParameterIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            parseOr(
+                """
             class Main:
                 def f(a=1, b):
                     pass
             """));
   }
 
-  @Test void parsesClassDefinition() {
-    Program program = parseOr("""
+  @Test
+  void parsesClassDefinition() {
+    Program program =
+        parseOr(
+            """
         class Point:
             def __init__(self, x: int, y: int):
                 pass
@@ -215,8 +235,11 @@ class ParserTest {
     assertEquals("int", init.parameters().get(2).type());
   }
 
-  @Test void parsesMultipleClasses() {
-    Program program = parseOr("""
+  @Test
+  void parsesMultipleClasses() {
+    Program program =
+        parseOr(
+            """
         class A:
             def main(self):
                 pass
@@ -228,21 +251,26 @@ class ParserTest {
     assertEquals(2, program.statements().size());
   }
 
-  @Test void parsesUntypedParameters() {
-    Program program = parseOr("""
+  @Test
+  void parsesUntypedParameters() {
+    Program program =
+        parseOr(
+            """
         class Foo:
             def bar(self, a, b):
                 pass
         """);
     FuncDef bar = ((ClassDef) program.statements().getFirst()).methods().getFirst();
-    assertEquals(List.of(
-        new Param("self", "obj"),
-        new Param("a", "obj"),
-        new Param("b", "obj")), bar.parameters());
+    assertEquals(
+        List.of(new Param("self", "obj"), new Param("a", "obj"), new Param("b", "obj")),
+        bar.parameters());
   }
 
-  @Test void parsesStaticMethodWithoutSelf() {
-    Program program = parseOr("""
+  @Test
+  void parsesStaticMethodWithoutSelf() {
+    Program program =
+        parseOr(
+            """
         class Util:
             def double(n: int):
                 return n
@@ -251,34 +279,43 @@ class ParserTest {
     assertEquals(new Param("n", "int"), method.parameters().getFirst());
   }
 
-  @Test void rejectsTopLevelStatement() {
+  @Test
+  void rejectsTopLevelStatement() {
     assertThrows(IllegalStateException.class, () -> parseOr("print(1)\n"));
   }
 
-  @Test void rejectsClassWithoutIndentedBody() {
-    assertThrows(IllegalStateException.class, () -> parseOr("""
+  @Test
+  void rejectsClassWithoutIndentedBody() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            parseOr(
+                """
         class Foo:
         print(1)
         """));
   }
 
-  @Test void parsesMethodDefinition() {
-    Program program = parseOr("""
+  @Test
+  void parsesMethodDefinition() {
+    Program program =
+        parseOr(
+            """
         class Main:
             def add(self, a, b):
                 return a
         """);
     FuncDef func = mainOf(program);
     assertEquals("add", func.name());
-    assertEquals(List.of(
-        new Param("self", "obj"),
-        new Param("a", "obj"),
-        new Param("b", "obj")), func.parameters());
+    assertEquals(
+        List.of(new Param("self", "obj"), new Param("a", "obj"), new Param("b", "obj")),
+        func.parameters());
     ReturnStmt ret = assertInstanceOf(ReturnStmt.class, func.body().statements().getFirst());
     assertInstanceOf(Identifier.class, ret.value());
   }
 
-  @Test void parsesTypedDeclaration() {
+  @Test
+  void parsesTypedDeclaration() {
     Block body = mainBody(main("a: int = 1"));
     VarDecl decl = assertInstanceOf(VarDecl.class, body.statements().getFirst());
     assertEquals("a", decl.name());
@@ -286,14 +323,16 @@ class ParserTest {
     assertEquals(1, assertInstanceOf(IntLiteral.class, decl.value()).value());
   }
 
-  @Test void parsesTypedDeclarationWithoutValue() {
+  @Test
+  void parsesTypedDeclarationWithoutValue() {
     Block body = mainBody(main("a: float"));
     VarDecl decl = assertInstanceOf(VarDecl.class, body.statements().getFirst());
     assertEquals("float", decl.type());
     assertNull(decl.value());
   }
 
-  @Test void parsesBuiltinCallExpression() {
+  @Test
+  void parsesBuiltinCallExpression() {
     Block body = mainBody(main("x = len(\"hello\")"));
     Assignment assignment = assertInstanceOf(Assignment.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, assignment.value());
@@ -301,14 +340,18 @@ class ParserTest {
     assertEquals(1, call.arguments().size());
   }
 
-  @Test void parsesPassStatement() {
+  @Test
+  void parsesPassStatement() {
     Block body = mainBody(main("if x:", "    pass"));
     IfStmt iff = assertInstanceOf(IfStmt.class, body.statements().getFirst());
     assertInstanceOf(PassStmt.class, iff.thenBlock().statements().getFirst());
   }
 
-  @Test void parsesEmptyReturn() {
-    Program program = parseOr("""
+  @Test
+  void parsesEmptyReturn() {
+    Program program =
+        parseOr(
+            """
         class Main:
             def f(self):
                 return
@@ -318,8 +361,11 @@ class ParserTest {
     assertNull(ret.value());
   }
 
-  @Test void parsesFileWithoutTrailingNewline() {
-    Program program = parseOr("""
+  @Test
+  void parsesFileWithoutTrailingNewline() {
+    Program program =
+        parseOr(
+            """
         class Main:
             def main(self):
                 x = 1
@@ -329,7 +375,8 @@ class ParserTest {
     assertEquals(1, clazz.methods().size());
   }
 
-  @Test void parsesAttributeAssignment() {
+  @Test
+  void parsesAttributeAssignment() {
     Block body = mainBody(main("self.count: int = 0"));
     SetAttr set = assertInstanceOf(SetAttr.class, body.statements().getFirst());
     assertEquals("self", assertInstanceOf(Identifier.class, set.receiver()).name());
@@ -338,13 +385,15 @@ class ParserTest {
     assertEquals(0, assertInstanceOf(IntLiteral.class, set.value()).value());
   }
 
-  @Test void parsesAttributeAssignmentWithoutType() {
+  @Test
+  void parsesAttributeAssignmentWithoutType() {
     Block body = mainBody(main("self.count = 5"));
     SetAttr set = assertInstanceOf(SetAttr.class, body.statements().getFirst());
     assertNull(set.type());
   }
 
-  @Test void parsesMethodCallStatement() {
+  @Test
+  void parsesMethodCallStatement() {
     Block body = mainBody(main("c.bump()"));
     ExprStmt stmt = assertInstanceOf(ExprStmt.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, stmt.expr());
@@ -353,7 +402,8 @@ class ParserTest {
     assertEquals("c", assertInstanceOf(Identifier.class, callee.receiver()).name());
   }
 
-  @Test void parsesConstructionStatement() {
+  @Test
+  void parsesConstructionStatement() {
     Block body = mainBody(main("Counter(4)"));
     ExprStmt stmt = assertInstanceOf(ExprStmt.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, stmt.expr());
@@ -361,14 +411,16 @@ class ParserTest {
     assertEquals(1, call.arguments().size());
   }
 
-  @Test void parsesAttributeRead() {
+  @Test
+  void parsesAttributeRead() {
     Block body = mainBody(main("x = p.count"));
     Assignment assignment = assertInstanceOf(Assignment.class, body.statements().getFirst());
     GetAttr attr = assertInstanceOf(GetAttr.class, assignment.value());
     assertEquals("count", attr.name());
   }
 
-  @Test void parsesStaticCallChain() {
+  @Test
+  void parsesStaticCallChain() {
     Block body = mainBody(main("Util.double(21)"));
     ExprStmt stmt = assertInstanceOf(ExprStmt.class, body.statements().getFirst());
     CallExpr call = assertInstanceOf(CallExpr.class, stmt.expr());
@@ -377,20 +429,26 @@ class ParserTest {
     assertEquals("double", callee.name());
   }
 
-  @Test void rejectsStandaloneExpression() {
+  @Test
+  void rejectsStandaloneExpression() {
     assertThrows(IllegalStateException.class, () -> parseOr(main("1 + 2")));
   }
 
-  @Test void rejectsBadIndentation() {
-    Lexer lexer = new Lexer("""
+  @Test
+  void rejectsBadIndentation() {
+    Lexer lexer =
+        new Lexer(
+            """
         if x:
             print(1)
           print(2)
-        """, "test.glg");
+        """,
+            "test.glg");
     assertThrows(IllegalStateException.class, lexer::tokenize);
   }
 
-  @Test void rejectsUnexpectedCharacters() {
+  @Test
+  void rejectsUnexpectedCharacters() {
     assertThrows(IllegalStateException.class, () -> new Lexer("x = 1 @ 2", "test.glg").tokenize());
   }
 }

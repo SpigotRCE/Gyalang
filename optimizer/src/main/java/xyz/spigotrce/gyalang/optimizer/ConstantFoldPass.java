@@ -20,11 +20,13 @@ import xyz.spigotrce.gyalang.ast.UnaryExpr;
 
 public class ConstantFoldPass implements OptimizationPass {
 
-  @Override public String getName() {
+  @Override
+  public String getName() {
     return "ConstantFold";
   }
 
-  @Override public Program run(Program program) {
+  @Override
+  public Program run(Program program) {
     List<Stmt> folded = new ArrayList<>();
     for (Stmt stmt : program.statements()) {
       folded.add(foldStmt(stmt));
@@ -69,7 +71,8 @@ public class ConstantFoldPass implements OptimizationPass {
       if (left instanceof IntLiteral(int value) && right instanceof IntLiteral(int value2)) {
         return foldIntBin(op, value, value2);
       }
-      if (left instanceof FloatLiteral(double value) && right instanceof FloatLiteral(double value1)) {
+      if (left instanceof FloatLiteral(double value)
+          && right instanceof FloatLiteral(double value1)) {
         return foldFloatBin(op, value, value1);
       }
       return new BinExpr(op, left, right);

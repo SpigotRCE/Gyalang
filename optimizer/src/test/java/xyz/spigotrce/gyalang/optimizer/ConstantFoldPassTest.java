@@ -23,8 +23,11 @@ class ConstantFoldPassTest {
 
   private final ConstantFoldPass pass = new ConstantFoldPass();
 
-  @Test void foldsIntegerAddition() {
-    Program input = new Program(List.of(printStmt(new BinExpr(BinExpr.Op.ADD, new IntLiteral(2), new IntLiteral(3)))));
+  @Test
+  void foldsIntegerAddition() {
+    Program input =
+        new Program(
+            List.of(printStmt(new BinExpr(BinExpr.Op.ADD, new IntLiteral(2), new IntLiteral(3)))));
     Program result = pass.run(input);
     Expr folded = printedValue(result.statements().getFirst());
     assertInstanceOf(IntLiteral.class, folded);
@@ -41,9 +44,14 @@ class ConstantFoldPassTest {
     return call.arguments().getFirst();
   }
 
-  @Test void foldsNestedArithmetic() {
+  @Test
+  void foldsNestedArithmetic() {
     // (1 + 2) * 3
-    Expr expr = new BinExpr(BinExpr.Op.MUL, new BinExpr(BinExpr.Op.ADD, new IntLiteral(1), new IntLiteral(2)), new IntLiteral(3));
+    Expr expr =
+        new BinExpr(
+            BinExpr.Op.MUL,
+            new BinExpr(BinExpr.Op.ADD, new IntLiteral(1), new IntLiteral(2)),
+            new IntLiteral(3));
     Program input = new Program(List.of(printStmt(expr)));
     Program result = pass.run(input);
     Expr folded = printedValue(result.statements().getFirst());
@@ -51,7 +59,8 @@ class ConstantFoldPassTest {
     assertEquals(9, ((IntLiteral) folded).value());
   }
 
-  @Test void foldsFloatAddition() {
+  @Test
+  void foldsFloatAddition() {
     Expr expr = new BinExpr(BinExpr.Op.ADD, new FloatLiteral(1.5), new FloatLiteral(2.5));
     Program input = new Program(List.of(printStmt(expr)));
     Program result = pass.run(input);
@@ -60,7 +69,8 @@ class ConstantFoldPassTest {
     assertEquals(4.0, ((FloatLiteral) folded).value());
   }
 
-  @Test void foldsComparisons() {
+  @Test
+  void foldsComparisons() {
     Expr expr = new BinExpr(BinExpr.Op.LT, new IntLiteral(1), new IntLiteral(2));
     Program input = new Program(List.of(printStmt(expr)));
     Program result = pass.run(input);
@@ -69,7 +79,8 @@ class ConstantFoldPassTest {
     assertTrue(((BoolLiteral) folded).value());
   }
 
-  @Test void foldsNegation() {
+  @Test
+  void foldsNegation() {
     Expr expr = new UnaryExpr(UnaryExpr.Op.NEG, new IntLiteral(7));
     Program input = new Program(List.of(printStmt(expr)));
     Program result = pass.run(input);
@@ -78,7 +89,8 @@ class ConstantFoldPassTest {
     assertEquals(-7, ((IntLiteral) folded).value());
   }
 
-  @Test void doesNotFoldNonConstantExpressions() {
+  @Test
+  void doesNotFoldNonConstantExpressions() {
     Expr expr = new BinExpr(BinExpr.Op.ADD, new Identifier("x"), new IntLiteral(1));
     Program input = new Program(List.of(printStmt(expr)));
     Program result = pass.run(input);
@@ -86,8 +98,10 @@ class ConstantFoldPassTest {
     assertInstanceOf(BinExpr.class, folded);
   }
 
-  @Test void foldsAssignmentValue() {
-    Assignment assign = new Assignment("x", new BinExpr(BinExpr.Op.MUL, new IntLiteral(3), new IntLiteral(4)));
+  @Test
+  void foldsAssignmentValue() {
+    Assignment assign =
+        new Assignment("x", new BinExpr(BinExpr.Op.MUL, new IntLiteral(3), new IntLiteral(4)));
     Program input = new Program(List.of(assign));
     Program result = pass.run(input);
     Assignment folded = (Assignment) result.statements().getFirst();

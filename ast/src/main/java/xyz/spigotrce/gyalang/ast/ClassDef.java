@@ -10,7 +10,8 @@ public record ClassDef(String name, List<FuncDef> methods) implements Stmt {
     this.methods = new ArrayList<>(methods);
   }
 
-  @Override public List<FuncDef> methods() {
+  @Override
+  public List<FuncDef> methods() {
     return Collections.unmodifiableList(methods);
   }
 }

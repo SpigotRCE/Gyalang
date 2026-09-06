@@ -107,7 +107,8 @@ public class Lexer {
         tokens.add(new Token(Token.Type.DEDENT, "", filename, pos));
       }
       if (indents.peek() != level) {
-        throw new IllegalStateException("Inconsistent indentation in " + filename + " at offset " + pos);
+        throw new IllegalStateException(
+            "Inconsistent indentation in " + filename + " at offset " + pos);
       }
     }
   }
@@ -155,7 +156,8 @@ public class Lexer {
 
   private Token readIdentifier() {
     int start = pos;
-    while (pos < source.length() && (Character.isLetterOrDigit(source.charAt(pos)) || source.charAt(pos) == '_')) {
+    while (pos < source.length()
+        && (Character.isLetterOrDigit(source.charAt(pos)) || source.charAt(pos) == '_')) {
       pos++;
     }
     String word = source.substring(start, pos);
@@ -180,7 +182,8 @@ public class Lexer {
           pos += 2;
           return new Token(Token.Type.NOT_EQUALS, "!=", filename, pos - 2);
         }
-        throw new IllegalStateException("Unexpected character '!' in " + filename + " at offset " + pos);
+        throw new IllegalStateException(
+            "Unexpected character '!' in " + filename + " at offset " + pos);
       }
       case '<' -> {
         if (next == '=') {
@@ -238,8 +241,9 @@ public class Lexer {
         pos++;
         return new Token(Token.Type.COMMA, ",", filename, pos - 1);
       }
-      default -> throw new IllegalStateException(
-          "Unexpected character '" + c + "' in " + filename + " at offset " + pos);
+      default ->
+          throw new IllegalStateException(
+              "Unexpected character '" + c + "' in " + filename + " at offset " + pos);
     }
   }
 

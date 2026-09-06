@@ -1,4 +1,3 @@
 package xyz.spigotrce.gyalang.ast;
 
-public record BoolLiteral(boolean value) implements Expr {
-}
+public record BoolLiteral(boolean value) implements Expr {}

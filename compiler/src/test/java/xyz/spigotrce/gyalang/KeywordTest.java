@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 class KeywordTest {
 
-  @Test void recognizedKeywords() {
+  @Test
+  void recognizedKeywords() {
     assertTrue(Keyword.isKeyword("if"));
     assertTrue(Keyword.isKeyword("while"));
     assertTrue(Keyword.isKeyword("def"));
@@ -20,7 +21,8 @@ class KeywordTest {
     assertTrue(Keyword.isKeyword("import"));
   }
 
-  @Test void notKeywords() {
+  @Test
+  void notKeywords() {
     assertFalse(Keyword.isKeyword("x"));
     assertFalse(Keyword.isKeyword("hello"));
     assertFalse(Keyword.isKeyword("123"));

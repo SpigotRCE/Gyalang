@@ -30,7 +30,8 @@ class TypeCheckPassTest {
 
   private final TypeCheckPass pass = new TypeCheckPass();
 
-  @Test void typedDeclarationIsAccepted() {
+  @Test
+  void typedDeclarationIsAccepted() {
     assertDoesNotThrow(() -> check(new VarDecl("a", "int", new IntLiteral(1))));
   }
 
@@ -39,72 +40,94 @@ class TypeCheckPassTest {
   }
 
   private static ClassDef mainClass(Stmt... stmts) {
-    return new ClassDef("Main", List.of(
-        new FuncDef("main", List.of(new Param("self", "obj")), new Block(List.of(stmts)))));
+    return new ClassDef(
+        "Main",
+        List.of(new FuncDef("main", List.of(new Param("self", "obj")), new Block(List.of(stmts)))));
   }
 
-  @Test void annotationWithoutValueIsAccepted() {
+  @Test
+  void annotationWithoutValueIsAccepted() {
     assertDoesNotThrow(() -> check(new VarDecl("a", "float", null)));
   }
 
-  @Test void intWidensToFloat() {
+  @Test
+  void intWidensToFloat() {
     assertDoesNotThrow(() -> check(new VarDecl("a", "float", new IntLiteral(1))));
   }
 
-  @Test void classTypedLocalIsAccepted() {
-    assertDoesNotThrow(() -> check(
-        new VarDecl("a", "Main", new CallExpr(new Identifier("Main"), List.of()))));
+  @Test
+  void classTypedLocalIsAccepted() {
+    assertDoesNotThrow(
+        () -> check(new VarDecl("a", "Main", new CallExpr(new Identifier("Main"), List.of()))));
   }
 
-  @Test void mismatchedAssignmentIsRejected() {
-    assertThrows(IllegalStateException.class,
-        () -> check(
-            new VarDecl("a", "int", new IntLiteral(1)),
-            new Assignment("a", new StringLiteral("oops"))));
+  @Test
+  void mismatchedAssignmentIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            check(
+                new VarDecl("a", "int", new IntLiteral(1)),
+                new Assignment("a", new StringLiteral("oops"))));
   }
 
-  @Test void redeclarationIsRejected() {
-    assertThrows(IllegalStateException.class,
-        () -> check(
-            new VarDecl("a", "int", new IntLiteral(1)),
-            new VarDecl("a", "float", new IntLiteral(2))));
+  @Test
+  void redeclarationIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            check(
+                new VarDecl("a", "int", new IntLiteral(1)),
+                new VarDecl("a", "float", new IntLiteral(2))));
   }
 
-  @Test void untypedBindingFixesType() {
-    assertDoesNotThrow(() -> check(
-        new Assignment("a", new IntLiteral(1)),
-        new Assignment("a", new IntLiteral(2))));
-    assertThrows(IllegalStateException.class,
-        () -> check(
-            new Assignment("a", new IntLiteral(1)),
-            new Assignment("a", new FloatLiteral(2.5))));
+  @Test
+  void untypedBindingFixesType() {
+    assertDoesNotThrow(
+        () ->
+            check(new Assignment("a", new IntLiteral(1)), new Assignment("a", new IntLiteral(2))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            check(
+                new Assignment("a", new IntLiteral(1)),
+                new Assignment("a", new FloatLiteral(2.5))));
   }
 
-  @Test void unknownTypeIsRejected() {
+  @Test
+  void unknownTypeIsRejected() {
     assertThrows(IllegalStateException.class, () -> check(new VarDecl("a", "doggo", null)));
   }
 
-  @Test void readBeforeDeclarationIsRejected() {
-    assertThrows(IllegalStateException.class,
-        () -> check(print(new Identifier("x"))));
+  @Test
+  void readBeforeDeclarationIsRejected() {
+    assertThrows(IllegalStateException.class, () -> check(print(new Identifier("x"))));
   }
 
   private static Stmt print(Expr value) {
     return new ExprStmt(new CallExpr(new Identifier("print"), List.of(value)));
   }
 
-  @Test void untypedParametersAreAssignableAsObjects() {
-    FuncDef f = new FuncDef("f",
-        List.of(new Param("self", "obj"), new Param("p", "obj")),
-        new Block(List.of(
-            new Assignment("p", new StringLiteral("x")),
-            new ReturnStmt(new Identifier("p")))));
-    assertDoesNotThrow(() -> checkProgram(
-        new ClassDef("Util", List.of(f)),
-        mainClass(
-            new VarDecl("u", "Util", new CallExpr(new Identifier("Util"), List.of())),
-            call(new CallExpr(new GetAttr(new Identifier("u"), "f"),
-                List.of(new StringLiteral("x")))))));
+  @Test
+  void untypedParametersAreAssignableAsObjects() {
+    FuncDef f =
+        new FuncDef(
+            "f",
+            List.of(new Param("self", "obj"), new Param("p", "obj")),
+            new Block(
+                List.of(
+                    new Assignment("p", new StringLiteral("x")),
+                    new ReturnStmt(new Identifier("p")))));
+    assertDoesNotThrow(
+        () ->
+            checkProgram(
+                new ClassDef("Util", List.of(f)),
+                mainClass(
+                    new VarDecl("u", "Util", new CallExpr(new Identifier("Util"), List.of())),
+                    call(
+                        new CallExpr(
+                            new GetAttr(new Identifier("u"), "f"),
+                            List.of(new StringLiteral("x")))))));
   }
 
   private void checkProgram(ClassDef... classes) {
@@ -115,128 +138,251 @@ class TypeCheckPassTest {
     return new ExprStmt(call);
   }
 
-  @Test void mixedIntFloatArithmeticIsAccepted() {
+  @Test
+  void mixedIntFloatArithmeticIsAccepted() {
     Expr mixed = new BinExpr(BinExpr.Op.ADD, new IntLiteral(1), new FloatLiteral(2.5));
     assertDoesNotThrow(() -> check(new Assignment("x", mixed)));
   }
 
-  @Test void stringConcatenationIsAccepted() {
+  @Test
+  void stringConcatenationIsAccepted() {
     Expr concat = new BinExpr(BinExpr.Op.ADD, new StringLiteral("a"), new StringLiteral("b"));
     assertDoesNotThrow(() -> check(new Assignment("x", concat)));
   }
 
-  @Test void stringSubIsRejected() {
+  @Test
+  void stringSubIsRejected() {
     Expr bad = new BinExpr(BinExpr.Op.SUB, new StringLiteral("a"), new StringLiteral("b"));
     assertThrows(IllegalStateException.class, () -> check(new Assignment("x", bad)));
   }
 
-  @Test void loopWithIncrementedCounterIsAccepted() {
-    assertDoesNotThrow(() -> check(
-        new Assignment("i", new IntLiteral(0)),
-        new WhileStmt(
-            new BinExpr(BinExpr.Op.LT, new Identifier("i"), new IntLiteral(3)),
-            new Block(List.of(
-                new Assignment("i",
-                    new BinExpr(BinExpr.Op.ADD, new Identifier("i"), new IntLiteral(1))))))));
+  @Test
+  void loopWithIncrementedCounterIsAccepted() {
+    assertDoesNotThrow(
+        () ->
+            check(
+                new Assignment("i", new IntLiteral(0)),
+                new WhileStmt(
+                    new BinExpr(BinExpr.Op.LT, new Identifier("i"), new IntLiteral(3)),
+                    new Block(
+                        List.of(
+                            new Assignment(
+                                "i",
+                                new BinExpr(
+                                    BinExpr.Op.ADD, new Identifier("i"), new IntLiteral(1))))))));
   }
 
-  @Test void typedFieldDeclarationIsAccepted() {
-    assertDoesNotThrow(() -> check(
-        new SetAttr(new Identifier("self"), "count", new IntLiteral(0), "int"),
-        print(new GetAttr(new Identifier("self"), "count"))));
+  @Test
+  void typedFieldDeclarationIsAccepted() {
+    assertDoesNotThrow(
+        () ->
+            check(
+                new SetAttr(new Identifier("self"), "count", new IntLiteral(0), "int"),
+                print(new GetAttr(new Identifier("self"), "count"))));
   }
 
-  @Test void mismatchedFieldAssignmentIsRejected() {
-    assertThrows(IllegalStateException.class, () -> check(
-        new SetAttr(new Identifier("self"), "count", new IntLiteral(0), "int"),
-        new SetAttr(new Identifier("self"), "count", new StringLiteral("x"), null)));
+  @Test
+  void mismatchedFieldAssignmentIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            check(
+                new SetAttr(new Identifier("self"), "count", new IntLiteral(0), "int"),
+                new SetAttr(new Identifier("self"), "count", new StringLiteral("x"), null)));
   }
 
-  @Test void fieldAccessOnPrimitiveIsRejected() {
-    assertThrows(IllegalStateException.class, () -> check(
-        new VarDecl("x", "int", new IntLiteral(1)),
-        print(new GetAttr(new Identifier("x"), "anything"))));
+  @Test
+  void fieldAccessOnPrimitiveIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            check(
+                new VarDecl("x", "int", new IntLiteral(1)),
+                print(new GetAttr(new Identifier("x"), "anything"))));
   }
 
-  @Test void constructorArgumentCountIsChecked() {
+  @Test
+  void constructorArgumentCountIsChecked() {
     ClassDef counter = counterClass();
-    assertDoesNotThrow(() -> checkProgram(counter,
-        mainClass(new VarDecl("c", "Counter", new CallExpr(new Identifier("Counter"),
-            List.of(new IntLiteral(5)))))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(counter,
-        mainClass(call(new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1),
-            new IntLiteral(2)))))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(counter,
-        mainClass(call(new CallExpr(new Identifier("Counter"),
-            List.of(new StringLiteral("x")))))));
+    assertDoesNotThrow(
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    new VarDecl(
+                        "c",
+                        "Counter",
+                        new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(5)))))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    call(
+                        new CallExpr(
+                            new Identifier("Counter"),
+                            List.of(new IntLiteral(1), new IntLiteral(2)))))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    call(
+                        new CallExpr(
+                            new Identifier("Counter"), List.of(new StringLiteral("x")))))));
   }
 
   private static ClassDef counterClass() {
-    return new ClassDef("Counter", List.of(
-        new FuncDef("__init__",
-            List.of(new Param("self", "obj"), new Param("start", "int")),
-            new Block(List.of(new SetAttr(new Identifier("self"), "count",
-                new Identifier("start"), "int")))),
-        new FuncDef("add", List.of(new Param("self", "obj"), new Param("n", "int")),
-            new Block(List.of(new SetAttr(new Identifier("self"), "count",
-                new BinExpr(BinExpr.Op.ADD, new GetAttr(new Identifier("self"), "count"),
-                    new Identifier("n")), null)))),
-        new FuncDef("get", List.of(new Param("self", "obj")),
-            new Block(List.of(new ReturnStmt(new GetAttr(new Identifier("self"), "count")))))));
+    return new ClassDef(
+        "Counter",
+        List.of(
+            new FuncDef(
+                "__init__",
+                List.of(new Param("self", "obj"), new Param("start", "int")),
+                new Block(
+                    List.of(
+                        new SetAttr(
+                            new Identifier("self"), "count", new Identifier("start"), "int")))),
+            new FuncDef(
+                "add",
+                List.of(new Param("self", "obj"), new Param("n", "int")),
+                new Block(
+                    List.of(
+                        new SetAttr(
+                            new Identifier("self"),
+                            "count",
+                            new BinExpr(
+                                BinExpr.Op.ADD,
+                                new GetAttr(new Identifier("self"), "count"),
+                                new Identifier("n")),
+                            null)))),
+            new FuncDef(
+                "get",
+                List.of(new Param("self", "obj")),
+                new Block(List.of(new ReturnStmt(new GetAttr(new Identifier("self"), "count")))))));
   }
 
-  @Test void constructorWithoutArgumentsIsAllowed() {
-    assertDoesNotThrow(() -> checkProgram(
-        new ClassDef("Empty", List.of()),
-        mainClass(new VarDecl("e", "Empty", new CallExpr(new Identifier("Empty"), List.of())))));
+  @Test
+  void constructorWithoutArgumentsIsAllowed() {
+    assertDoesNotThrow(
+        () ->
+            checkProgram(
+                new ClassDef("Empty", List.of()),
+                mainClass(
+                    new VarDecl("e", "Empty", new CallExpr(new Identifier("Empty"), List.of())))));
   }
 
-  @Test void instanceMethodCallIsChecked() {
+  @Test
+  void instanceMethodCallIsChecked() {
     ClassDef counter = counterClass();
-    assertDoesNotThrow(() -> checkProgram(counter,
-        mainClass(
-            new VarDecl("c", "Counter", new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
-            call(new CallExpr(new GetAttr(new Identifier("c"), "add"), List.of(new IntLiteral(2)))),
-            print(new CallExpr(new GetAttr(new Identifier("c"), "get"), List.of())))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(counter,
-        mainClass(
-            new VarDecl("c", "Counter", new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
-            call(new CallExpr(new GetAttr(new Identifier("c"), "add"), List.of(new StringLiteral("x")))))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(counter,
-        mainClass(
-            new VarDecl("c", "Counter", new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
-            call(new CallExpr(new GetAttr(new Identifier("c"), "missing"), List.of())))));
+    assertDoesNotThrow(
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    new VarDecl(
+                        "c",
+                        "Counter",
+                        new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
+                    call(
+                        new CallExpr(
+                            new GetAttr(new Identifier("c"), "add"), List.of(new IntLiteral(2)))),
+                    print(new CallExpr(new GetAttr(new Identifier("c"), "get"), List.of())))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    new VarDecl(
+                        "c",
+                        "Counter",
+                        new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
+                    call(
+                        new CallExpr(
+                            new GetAttr(new Identifier("c"), "add"),
+                            List.of(new StringLiteral("x")))))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    new VarDecl(
+                        "c",
+                        "Counter",
+                        new CallExpr(new Identifier("Counter"), List.of(new IntLiteral(1)))),
+                    call(new CallExpr(new GetAttr(new Identifier("c"), "missing"), List.of())))));
   }
 
-  @Test void staticMethodCallIsChecked() {
-    ClassDef util = new ClassDef("Util", List.of(
-        new FuncDef("double", List.of(new Param("n", "int")),
-            new Block(List.of(new ReturnStmt(
-                new BinExpr(BinExpr.Op.MUL, new Identifier("n"), new IntLiteral(2))))))));
-    assertDoesNotThrow(() -> checkProgram(util,
-        mainClass(print(new CallExpr(new GetAttr(new Identifier("Util"), "double"),
-            List.of(new IntLiteral(21)))))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(util,
-        mainClass(call(new CallExpr(new GetAttr(new Identifier("Util"), "double"),
-            List.of(new StringLiteral("x")))))));
+  @Test
+  void staticMethodCallIsChecked() {
+    ClassDef util =
+        new ClassDef(
+            "Util",
+            List.of(
+                new FuncDef(
+                    "double",
+                    List.of(new Param("n", "int")),
+                    new Block(
+                        List.of(
+                            new ReturnStmt(
+                                new BinExpr(
+                                    BinExpr.Op.MUL, new Identifier("n"), new IntLiteral(2))))))));
+    assertDoesNotThrow(
+        () ->
+            checkProgram(
+                util,
+                mainClass(
+                    print(
+                        new CallExpr(
+                            new GetAttr(new Identifier("Util"), "double"),
+                            List.of(new IntLiteral(21)))))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                util,
+                mainClass(
+                    call(
+                        new CallExpr(
+                            new GetAttr(new Identifier("Util"), "double"),
+                            List.of(new StringLiteral("x")))))));
   }
 
-  @Test void instanceMethodCannotBeCalledStatically() {
-    ClassDef counter = new ClassDef("Counter", List.of(
-        new FuncDef("get", List.of(new Param("self", "obj")),
-            new Block(List.of(new ReturnStmt(new IntLiteral(1)))))));
-    assertThrows(IllegalStateException.class, () -> checkProgram(counter,
-        mainClass(call(new CallExpr(new GetAttr(new Identifier("Counter"), "get"), List.of())))));
+  @Test
+  void instanceMethodCannotBeCalledStatically() {
+    ClassDef counter =
+        new ClassDef(
+            "Counter",
+            List.of(
+                new FuncDef(
+                    "get",
+                    List.of(new Param("self", "obj")),
+                    new Block(List.of(new ReturnStmt(new IntLiteral(1)))))));
+    assertThrows(
+        IllegalStateException.class,
+        () ->
+            checkProgram(
+                counter,
+                mainClass(
+                    call(new CallExpr(new GetAttr(new Identifier("Counter"), "get"), List.of())))));
   }
 
-  @Test void topLevelNonClassStatementIsRejected() {
-    assertThrows(IllegalStateException.class, () -> pass.run(new Program(
-        List.of(print(new IntLiteral(1))))));
+  @Test
+  void topLevelNonClassStatementIsRejected() {
+    assertThrows(
+        IllegalStateException.class,
+        () -> pass.run(new Program(List.of(print(new IntLiteral(1))))));
   }
 
-  @Test void duplicateMethodIsRejected() {
+  @Test
+  void duplicateMethodIsRejected() {
     FuncDef duplicate = new FuncDef("f", List.of(new Param("self", "obj")), new Block(List.of()));
-    assertThrows(IllegalStateException.class, () -> checkProgram(
-        new ClassDef("Dup", List.of(duplicate, duplicate))));
+    assertThrows(
+        IllegalStateException.class,
+        () -> checkProgram(new ClassDef("Dup", List.of(duplicate, duplicate))));
   }
 }

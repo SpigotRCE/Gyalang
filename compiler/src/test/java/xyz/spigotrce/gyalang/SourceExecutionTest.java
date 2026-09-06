@@ -12,16 +12,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Compiles real Gylang source (as it would be written in a .glg file) through
- * the full lexer -> parser -> codegen pipeline, then runs the output with the
- * real JVM.
+ * Compiles real Gylang source (as it would be written in a .glg file) through the full lexer ->
+ * parser -> codegen pipeline, then runs the output with the real JVM.
  */
 class SourceExecutionTest {
 
   @TempDir Path tempDir;
 
-  @Test void simplePrintAndMath() throws Exception {
-    String source = """
+  @Test
+  void simplePrintAndMath() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 x = 5
@@ -46,10 +47,14 @@ class SourceExecutionTest {
     String javaHome = System.getProperty("java.home");
     String className = "gyalang.generated.Main";
 
-    Process process = new ProcessBuilder(javaHome + "/bin/java", "-cp", out.toString(), className).redirectErrorStream(true).start();
+    Process process =
+        new ProcessBuilder(javaHome + "/bin/java", "-cp", out.toString(), className)
+            .redirectErrorStream(true)
+            .start();
 
     String output;
-    try (InputStream is = process.getInputStream(); ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+    try (InputStream is = process.getInputStream();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
       byte[] buf = new byte[4096];
       int n;
       while ((n = is.read(buf)) != -1) {
@@ -63,8 +68,10 @@ class SourceExecutionTest {
     return output.replace("\r\n", "\n").trim();
   }
 
-  @Test void ifElse() throws Exception {
-    String source = """
+  @Test
+  void ifElse() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 x = 5
@@ -76,8 +83,10 @@ class SourceExecutionTest {
     assertEquals("big", executeSource(source, "branch.glg"));
   }
 
-  @Test void whileLoop() throws Exception {
-    String source = """
+  @Test
+  void whileLoop() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 i = 0
@@ -85,14 +94,18 @@ class SourceExecutionTest {
                     print(i)
                     i = i + 1
         """;
-    assertEquals("""
+    assertEquals(
+        """
         0
         1
-        2""", executeSource(source, "loop.glg"));
+        2""",
+        executeSource(source, "loop.glg"));
   }
 
-  @Test void forLoopOverString() throws Exception {
-    String source = """
+  @Test
+  void forLoopOverString() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 out = ""
@@ -107,8 +120,10 @@ class SourceExecutionTest {
     assertEquals("abc\n5", executeSource(source, "for.glg"));
   }
 
-  @Test void rangeLoop() throws Exception {
-    String source = """
+  @Test
+  void rangeLoop() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 total = 0
@@ -120,18 +135,22 @@ class SourceExecutionTest {
                 for i in range(3, 0, -1):
                     print(i)
         """;
-    assertEquals("""
+    assertEquals(
+        """
         6
         2
         3
         4
         3
         2
-        1""", executeSource(source, "range.glg"));
+        1""",
+        executeSource(source, "range.glg"));
   }
 
-  @Test void mathBuiltins() throws Exception {
-    String source = """
+  @Test
+  void mathBuiltins() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 print(abs(-5))
@@ -141,17 +160,21 @@ class SourceExecutionTest {
                 print(round(3.6))
                 print(sqrt(16.0))
         """;
-    assertEquals("""
+    assertEquals(
+        """
         5
         2.5
         3
         7
         4
-        4.0""", executeSource(source, "math.glg"));
+        4.0""",
+        executeSource(source, "math.glg"));
   }
 
-  @Test void stringBuiltins() throws Exception {
-    String source = """
+  @Test
+  void stringBuiltins() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 print(sum(range(1, 5)))
@@ -159,15 +182,19 @@ class SourceExecutionTest {
                 print(chr(66))
                 print(len("hello"))
         """;
-    assertEquals("""
+    assertEquals(
+        """
         10
         65
         B
-        5""", executeSource(source, "stringbuiltins.glg"));
+        5""",
+        executeSource(source, "stringbuiltins.glg"));
   }
 
-  @Test void printWithSepAndEnd() throws Exception {
-    String source = """
+  @Test
+  void printWithSepAndEnd() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 print("Hello", "World")
@@ -175,55 +202,67 @@ class SourceExecutionTest {
                 print("x", end="")
                 print("|")
         """;
-    assertEquals("""
+    assertEquals(
+        """
         Hello World
         a, b, c
-        x|""", executeSource(source, "printkw.glg"));
+        x|""",
+        executeSource(source, "printkw.glg"));
   }
 
-  @Test void printAcceptsFileAndFlushKeywords() throws Exception {
-    String source = """
+  @Test
+  void printAcceptsFileAndFlushKeywords() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 print("a", "b", sep="-", file="io", flush=True)
                 print("c", flush=False)
                 print("d", end="")
         """;
-    assertEquals("""
+    assertEquals(
+        """
         a-b
         c
-        d""", executeSource(source, "printfull.glg"));
+        d""",
+        executeSource(source, "printfull.glg"));
   }
 
-  @Test void methodDefaultsAndKeywords() throws Exception {
-    String source = """
+  @Test
+  void methodDefaultsAndKeywords() throws Exception {
+    String source =
+        """
         class Main:
             def greet(name, greeting="Hello", punct="!"):
                 print(greeting, name, sep=" ", end="")
                 print(punct)
-        
+
             def main():
                 Main.greet("Alice")
                 Main.greet("Bob", "Hi")
                 Main.greet("Carol", greeting="Hey", punct=".")
                 Main.greet("Dave", punct="?", greeting="Yo")
         """;
-    assertEquals("""
+    assertEquals(
+        """
         Hello Alice!
         Hi Bob!
         Hey Carol.
-        Yo Dave?""", executeSource(source, "defaults.glg"));
+        Yo Dave?""",
+        executeSource(source, "defaults.glg"));
   }
 
-  @Test void constructorWithMethodDefaults() throws Exception {
-    String source = """
+  @Test
+  void constructorWithMethodDefaults() throws Exception {
+    String source =
+        """
         class Point:
             def __init__(self, x=0, y=0):
                 self.x = x
                 self.y = y
             def show(self):
                 print(self.x, self.y, sep=",")
-        
+
         class Main:
             def main():
                 Point().show()
@@ -231,39 +270,47 @@ class SourceExecutionTest {
                 Point(3, 4).show()
                 Point(y=7).show()
         """;
-    assertEquals("""
+    assertEquals(
+        """
         0,0
         3,0
         3,4
-        0,7""", executeSource(source, "ctor_defaults.glg"));
+        0,7""",
+        executeSource(source, "ctor_defaults.glg"));
   }
 
-  @Test void methodVarargs() throws Exception {
-    String source = """
+  @Test
+  void methodVarargs() throws Exception {
+    String source =
+        """
         class Main:
             def show(label, *nums):
                 print(label, end=":")
                 for n in nums:
                     print(" ", n, sep="", end="")
                 print()
-        
+
             def main():
                 Main.show("none")
                 Main.show("one", 5)
                 Main.show("three", 1, 2, 3)
         """;
-    assertEquals("""
+    assertEquals(
+        """
         none:
         one: 5
-        three: 1 2 3""", executeSource(source, "varargs.glg"));
+        three: 1 2 3""",
+        executeSource(source, "varargs.glg"));
   }
 
-  @Test void instanceMethodWithTypedParams() throws Exception {
-    String source = """
+  @Test
+  void instanceMethodWithTypedParams() throws Exception {
+    String source =
+        """
         class Math:
             def add(self, a: int, b: int):
                 return a + b
-        
+
         class Main:
             def main():
                 print(Math().add(40, 2))
@@ -271,12 +318,14 @@ class SourceExecutionTest {
     assertEquals("42", executeSource(source, "method.glg"));
   }
 
-  @Test void staticMethodCall() throws Exception {
-    String source = """
+  @Test
+  void staticMethodCall() throws Exception {
+    String source =
+        """
         class Util:
             def double(n: int):
                 return n * 2
-        
+
         class Main:
             def main():
                 print(Util.double(21))
@@ -284,18 +333,20 @@ class SourceExecutionTest {
     assertEquals("42", executeSource(source, "static.glg"));
   }
 
-  @Test void constructorWithFieldsAndMethods() throws Exception {
-    String source = """
+  @Test
+  void constructorWithFieldsAndMethods() throws Exception {
+    String source =
+        """
         class Counter:
             def __init__(self, start: int):
                 self.count: int = start
-        
+
             def bump(self):
                 self.count = self.count + 1
-        
+
             def get(self):
                 return self.count
-        
+
         class Main:
             def main():
                 c = Counter(10)
@@ -306,18 +357,20 @@ class SourceExecutionTest {
     assertEquals("12", executeSource(source, "counter.glg"));
   }
 
-  @Test void twoObjectsHaveIndependentFields() throws Exception {
-    String source = """
+  @Test
+  void twoObjectsHaveIndependentFields() throws Exception {
+    String source =
+        """
         class Counter:
             def __init__(self, start: int):
                 self.count: int = start
-        
+
             def bump(self):
                 self.count = self.count + 1
-        
+
             def get(self):
                 return self.count
-        
+
         class Main:
             def main():
                 a = Counter(0)
@@ -329,8 +382,10 @@ class SourceExecutionTest {
     assertEquals("1\n100", executeSource(source, "independent.glg"));
   }
 
-  @Test void builtinLenAndStr() throws Exception {
-    String source = """
+  @Test
+  void builtinLenAndStr() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 s = "hello"
@@ -340,8 +395,10 @@ class SourceExecutionTest {
     assertEquals("5\n100", executeSource(source, "builtins.glg"));
   }
 
-  @Test void typedVariables() throws Exception {
-    String source = """
+  @Test
+  void typedVariables() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 a: int = 10
@@ -352,8 +409,10 @@ class SourceExecutionTest {
     assertEquals("10\n10.0", executeSource(source, "typed.glg"));
   }
 
-  @Test void typedVariableWithoutInitializerDefaultsToZero() throws Exception {
-    String source = """
+  @Test
+  void typedVariableWithoutInitializerDefaultsToZero() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 count: int
@@ -362,8 +421,10 @@ class SourceExecutionTest {
     assertEquals("0", executeSource(source, "typed_default.glg"));
   }
 
-  @Test void mixedIntFloatArithmeticProducesFloat() throws Exception {
-    String source = """
+  @Test
+  void mixedIntFloatArithmeticProducesFloat() throws Exception {
+    String source =
+        """
         class Main:
             def main():
                 x = 2 + 3.5
@@ -372,18 +433,20 @@ class SourceExecutionTest {
     assertEquals("5.5", executeSource(source, "mixed.glg"));
   }
 
-  @Test void floatFieldStorageWorks() throws Exception {
-    String source = """
+  @Test
+  void floatFieldStorageWorks() throws Exception {
+    String source =
+        """
         class Bank:
             def __init__(self):
                 self.balance: float = 0.0
-        
+
             def deposit(self, amount: float):
                 self.balance = self.balance + amount
-        
+
             def get_balance(self):
                 return self.balance
-        
+
         class Main:
             def main():
                 b = Bank()
@@ -394,8 +457,10 @@ class SourceExecutionTest {
     assertEquals("3.75", executeSource(source, "bank.glg"));
   }
 
-  @Test void mismatchedAssignmentIsRejected() {
-    String source = """
+  @Test
+  void mismatchedAssignmentIsRejected() {
+    String source =
+        """
         class Main:
             def main():
                 a: int = 1
@@ -404,8 +469,10 @@ class SourceExecutionTest {
     assertThrows(IllegalStateException.class, () -> new Compiler(source, "bad.glg").compile());
   }
 
-  @Test void readBeforeDeclarationIsRejected() {
-    String source = """
+  @Test
+  void readBeforeDeclarationIsRejected() {
+    String source =
+        """
         class Main:
             def main():
                 print(x)
@@ -414,8 +481,10 @@ class SourceExecutionTest {
     assertThrows(IllegalStateException.class, () -> new Compiler(source, "undef.glg").compile());
   }
 
-  @Test void missingEntryClassIsRejected() {
-    String source = """
+  @Test
+  void missingEntryClassIsRejected() {
+    String source =
+        """
         class Foo:
             def main():
                 print(1)
@@ -423,8 +492,10 @@ class SourceExecutionTest {
     assertThrows(IllegalStateException.class, () -> new Compiler(source, "nomain.glg").compile());
   }
 
-  @Test void entryClassWithoutMainIsRejected() {
-    String source = """
+  @Test
+  void entryClassWithoutMainIsRejected() {
+    String source =
+        """
         class Main:
             def helper(self):
                 print(1)

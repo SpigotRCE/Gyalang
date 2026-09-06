@@ -56,9 +56,10 @@ public class Compiler {
     for (Stmt stmt : program.statements()) {
       if (stmt instanceof ClassDef(String name, List<FuncDef> methods) && name.equals("Main")) {
         for (FuncDef method : methods) {
-          boolean instanceMain = method.name().equals("main")
-              && !method.parameters().isEmpty()
-              && method.parameters().getFirst().name().equals("self");
+          boolean instanceMain =
+              method.name().equals("main")
+                  && !method.parameters().isEmpty()
+                  && method.parameters().getFirst().name().equals("self");
           if (!instanceMain && method.name().equals("main")) {
             return;
           }

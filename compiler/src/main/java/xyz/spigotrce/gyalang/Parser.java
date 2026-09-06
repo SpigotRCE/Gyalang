@@ -107,7 +107,12 @@ public class Parser {
       if (p.default_() != null) {
         seenDefault = true;
       } else if (seenDefault) {
-        throw error("non-default argument '" + p.name() + "' follows default argument in function '" + funcName + "'");
+        throw error(
+            "non-default argument '"
+                + p.name()
+                + "' follows default argument in function '"
+                + funcName
+                + "'");
       }
     }
   }
@@ -348,12 +353,13 @@ public class Parser {
     while (peek().type() == Token.Type.STAR
         || peek().type() == Token.Type.SLASH
         || peek().type() == Token.Type.PERCENT) {
-      BinExpr.Op op = switch (peek().type()) {
-        case STAR -> BinExpr.Op.MUL;
-        case SLASH -> BinExpr.Op.DIV;
-        case PERCENT -> BinExpr.Op.MOD;
-        default -> throw error("Unexpected token: " + peek());
-      };
+      BinExpr.Op op =
+          switch (peek().type()) {
+            case STAR -> BinExpr.Op.MUL;
+            case SLASH -> BinExpr.Op.DIV;
+            case PERCENT -> BinExpr.Op.MOD;
+            default -> throw error("Unexpected token: " + peek());
+          };
       advance();
       left = new BinExpr(op, left, unary());
     }
@@ -457,9 +463,12 @@ public class Parser {
   }
 
   private boolean isComparisonOp(Token.Type type) {
-    return type == Token.Type.EQUALS_EQUALS || type == Token.Type.NOT_EQUALS
-        || type == Token.Type.LESS || type == Token.Type.GREATER
-        || type == Token.Type.LESS_EQUALS || type == Token.Type.GREATER_EQUALS;
+    return type == Token.Type.EQUALS_EQUALS
+        || type == Token.Type.NOT_EQUALS
+        || type == Token.Type.LESS
+        || type == Token.Type.GREATER
+        || type == Token.Type.LESS_EQUALS
+        || type == Token.Type.GREATER_EQUALS;
   }
 
   private BinExpr.Op comparisonOp(Token.Type type) {
@@ -523,6 +532,7 @@ public class Parser {
   }
 
   private IllegalStateException error(String message) {
-    return new IllegalStateException(message + " in " + filename + " at offset " + peek().position());
+    return new IllegalStateException(
+        message + " in " + filename + " at offset " + peek().position());
   }
 }

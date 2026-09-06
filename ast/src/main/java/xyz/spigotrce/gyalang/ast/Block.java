@@ -9,7 +9,8 @@ public record Block(List<Stmt> statements) implements Stmt {
     this.statements = new ArrayList<>(statements);
   }
 
-  @Override public List<Stmt> statements() {
+  @Override
+  public List<Stmt> statements() {
     return Collections.unmodifiableList(statements);
   }
 }

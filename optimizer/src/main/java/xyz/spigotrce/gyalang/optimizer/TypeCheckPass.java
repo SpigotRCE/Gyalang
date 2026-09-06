@@ -38,15 +38,19 @@ public class TypeCheckPass implements OptimizationPass {
 
   private static final Set<String> PRIMITIVES = Set.of("int", "float", "str", "bool");
   private static final Set<String> BUILTINS =
-      Set.of("print", "input", "len", "int", "float", "str", "bool", "abs", "min", "max", "round", "sqrt", "range", "sum", "ord", "chr");
+      Set.of(
+          "print", "input", "len", "int", "float", "str", "bool", "abs", "min", "max", "round",
+          "sqrt", "range", "sum", "ord", "chr");
   private final Map<String, ClassInfo> classes = new HashMap<>();
   private final Deque<Frame> frames = new ArrayDeque<>();
 
-  @Override public String getName() {
+  @Override
+  public String getName() {
     return "TypeCheck";
   }
 
-  @Override public Program run(Program program) {
+  @Override
+  public Program run(Program program) {
     classes.clear();
     frames.clear();
     for (Stmt stmt : program.statements()) {
@@ -109,8 +113,7 @@ public class TypeCheckPass implements OptimizationPass {
         }
         case WhileStmt(Expr c, Block body) -> collectFieldDecls(info, body);
         case ForStmt(String variable, Expr iterable, Block body) -> collectFieldDecls(info, body);
-        default -> {
-        }
+        default -> {}
       }
     }
   }
@@ -143,7 +146,8 @@ public class TypeCheckPass implements OptimizationPass {
     }
     for (int i = instance ? 1 : 0; i < params.size(); i++) {
       Param param = params.get(i);
-      frame.params.put(param.name(), param.type().equals("obj") ? "obj" : resolveType(param.type()));
+      frame.params.put(
+          param.name(), param.type().equals("obj") ? "obj" : resolveType(param.type()));
     }
     frames.push(frame);
     try {
@@ -164,7 +168,8 @@ public class TypeCheckPass implements OptimizationPass {
       case ExprStmt(Expr expr) -> checkExpr(expr);
       case Assignment(String name, Expr value) -> checkAssignment(name, value);
       case VarDecl(String name, String type, Expr value) -> checkLocalDecl(name, type, value);
-      case SetAttr(Expr receiver, String name, Expr value, String type) -> checkSetAttr(receiver, name, value, type);
+      case SetAttr(Expr receiver, String name, Expr value, String type) ->
+          checkSetAttr(receiver, name, value, type);
       case IfStmt(Expr condition, Block thenBlock, Block elseBlock) -> {
         checkExpr(condition);
         checkBlock(thenBlock);
@@ -274,7 +279,8 @@ public class TypeCheckPass implements OptimizationPass {
     if (expr instanceof GetAttr(Expr receiver, String name)) {
       String classOfReceiver = typeOfExpr(receiver);
       if (!classes.containsKey(classOfReceiver)) {
-        throw illegal("cannot access attribute '" + name + "' on non-object type " + classOfReceiver);
+        throw illegal(
+            "cannot access attribute '" + name + "' on non-object type " + classOfReceiver);
       }
       String fieldType = classes.get(classOfReceiver).fields.get(name);
       return fieldType != null ? fieldType : "obj";
@@ -480,10 +486,12 @@ public class TypeCheckPass implements OptimizationPass {
         } else if (param.default_() != null) {
           value = param.default_();
         } else {
-          throw illegal("call to '" + signature + "' missing required argument '" + param.name() + "'");
+          throw illegal(
+              "call to '" + signature + "' missing required argument '" + param.name() + "'");
         }
       }
-      String paramType = param.type() == null || param.type().equals("obj") ? "obj" : resolveType(param.type());
+      String paramType =
+          param.type() == null || param.type().equals("obj") ? "obj" : resolveType(param.type());
       if (!isObj(paramType)) {
         requireAssignable(signature, paramType, typeOfExpr(value));
       }
@@ -548,8 +556,9 @@ public class TypeCheckPass implements OptimizationPass {
   }
 
   private boolean isRangeCall(Expr expr) {
-    return expr instanceof CallExpr(Expr callee, List<Expr> arguments, List<NamedArg> keywords) && callee instanceof Identifier(String name) &&
-        name.equals("range");
+    return expr instanceof CallExpr(Expr callee, List<Expr> arguments, List<NamedArg> keywords)
+        && callee instanceof Identifier(String name)
+        && name.equals("range");
   }
 
   private String resolveType(String type) {
@@ -572,7 +581,8 @@ public class TypeCheckPass implements OptimizationPass {
     if (declared.equals("float") && actual.equals("int")) {
       return;
     }
-    throw illegal("type mismatch for '" + name + "': declared " + declared + " but assigned " + actual);
+    throw illegal(
+        "type mismatch for '" + name + "': declared " + declared + " but assigned " + actual);
   }
 
   private boolean isObj(String type) {
